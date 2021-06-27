@@ -18,6 +18,8 @@
 #include "IMG_0001.h"
 #include "thermometer.h"
 #include "weather.h"
+#include "Clock.h"
+#include "DisplayService.h"
 
 extern "C" {
     #include "box.h"
@@ -30,12 +32,11 @@ uint16_t msgIncr = 0;
 RTC_DATA_ATTR int bootCount = 0;
 void(* resetFunc) (void) = 0;  //declare reset funciton @ address 0
 Thermometer tm(display, TEMPADCPIN);
+Clock clock(7200, 3600, "pool.ntp.org");
 
 const char * ssid = "Krisi";
 const char * ssidPass = "krisi9404194775";
-const char * ntpServer = "pool.ntp.org";
-const long   gmtOffset_sec = 7200;
-const int    daylightOffset_sec = 3600;
+
 
 /* OpenWeather settings */
 Weather ow("42.1627557", "24.7487006", "Plovdiv Bulgaria", "36d9d56c52e94add5faac575aef78dcf");
@@ -177,14 +178,7 @@ void wifiStart() {
 }
 
 void printLocalTime() {
-    struct tm timeinfo;
-
-    if(!getLocalTime(&timeinfo)){
-        Serial.println("Failed to obtain time");
-        return;
-    }
-
-    Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+    Serial.println(clock.getTime(), "%A, %B %d %Y %H:%M:%S");
 }
 
 void updateClock() {
@@ -219,18 +213,6 @@ void updateClock() {
     // @todo DisplayManager който да събира цялата информация от всички обекти
     // и да има update() метод, който метод да блъска всичко в дисплея и накрая
     // да извиква само веднъж display.update()
-
-    Serial.print("I was about to write down: ");
-    Serial.println(buff);
-    Serial.print("Variables: ");
-    Serial.print(box.x);
-    Serial.print("\t");
-    Serial.print(box.y);
-    Serial.print("\t");
-    Serial.print(box.w);
-    Serial.print("\t");
-    Serial.print(box.h);
-    Serial.println("");
 }
 
 void updateThermometer() {
@@ -247,7 +229,7 @@ void updateThermometer() {
 }
 
 void syncTime() {
-    configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);    
+    clock.begin();
     printLocalTime();
 }
 
