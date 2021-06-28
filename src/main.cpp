@@ -18,6 +18,7 @@
 #include "weather.h"
 #include "Clock.h"
 #include "DisplayService.h"
+#include "DisplayData.h"
 
 const char * ssid = "Krisi";
 const char * ssidPass = "krisi9404194775";
@@ -26,15 +27,16 @@ void(* resetFunc) (void) = 0;  //declare reset funciton @ address 0
 GxIO_Class io(SPI, EPD_CS, EPD_DC, EPD_RSET);
 GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 RTC_DATA_ATTR int bootCount = 0;
-RTC_DATA_ATTR Clock timeClock(7200, 3600, "pool.ntp.org");
-RTC_DATA_ATTR Weather ow("42.1627557", "24.7487006", "Plovdiv Bulgaria", "36d9d56c52e94add5faac575aef78dcf");
+RTC_DATA_ATTR displaydata_t displayDataStore;
 
+Clock timeClock(7200, 3600, "pool.ntp.org");
+Weather ow("42.1627557", "24.7487006", "Plovdiv Bulgaria", "36d9d56c52e94add5faac575aef78dcf");
 Thermometer tm(display, TEMPADCPIN);
-
 DisplayService displayManager(display, ow, timeClock, tm);
 
 void showBoot();
 void wifiStart();
+void dumpDisplayData();
 
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
@@ -42,6 +44,8 @@ void setup() {
     Serial.println("setup");
 
     delay(1000);
+
+    dumpDisplayData();
 
     display.init(SERIAL_BAUD_RATE);
     displayManager.begin();
@@ -55,9 +59,11 @@ void setup() {
             bootCount = 0;
             wifiStart();
             displayManager.fullUpdate();
+        } else {
+            displayManager.unserialize(displayDataStore);
+            displayManager.update();
         }
 
-        displayManager.update();
     } else {
         // First boot
         showBoot();
@@ -67,6 +73,8 @@ void setup() {
         display.eraseDisplay();
         displayManager.fullUpdate();
     }
+
+    displayManager.serialize(displayDataStore);
 
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_39, 0);
     esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
@@ -104,4 +112,33 @@ void wifiStart() {
 
     Serial.println("");
     Serial.println("Wifi connected.");
+}
+
+void dumpDisplayData() {
+    Serial.println("Dumping serialized display data...");
+
+    Serial.print("Main weather: ");
+    Serial.println(displayDataStore.forecasts[0].weather);
+
+    Serial.print("Unix time: ");
+    Serial.println(displayDataStore.unixTime);
+
+    Serial.print("Room temp: ");
+    Serial.println(displayDataStore.roomTemp);
+
+    Serial.println("Forecasts");
+
+    for (int i = 0; i < 5; i++) {
+        forecast_t forecast = displayDataStore.forecasts[i];
+
+        Serial.print("Forecast #");
+        Serial.print(i);
+        Serial.print(" main: ");
+        Serial.print(forecast.weather);
+        Serial.print(" -- ");
+        Serial.println(forecast.temp);
+    }
+
+    Serial.println("Data dumped successfully...");
+    delay(500);
 }

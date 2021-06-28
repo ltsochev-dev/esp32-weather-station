@@ -11,6 +11,17 @@ void Clock::begin()
     getTime();
 }
 
+time_t Clock::getUnixtime()
+{
+    time_t now;
+    
+    getTime();
+
+    time(&now);
+
+    return now;
+}
+
 const struct tm & Clock::getTime()
 {
     getLocalTime(&timeInfo);

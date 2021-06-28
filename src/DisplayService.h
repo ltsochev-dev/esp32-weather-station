@@ -3,10 +3,13 @@
 
 #include <GxEPD.h>
 #include <U8g2_for_Adafruit_GFX.h>
+#include <time.h>
+#include <sys/time.h>
 #include "thermometer.h"
 #include "weather.h"
 #include "Clock.h"
 #include "box.h"
+#include "DisplayData.h"
 
 class DisplayService
 {
@@ -15,6 +18,8 @@ public:
     void begin();
     void fullUpdate();
     void update();
+    void serialize(displaydata_t&);
+    void unserialize(displaydata_t&);
 private:
     void loadSources();
     void drawClock();
@@ -23,6 +28,7 @@ private:
     void drawForecast();
     struct box createBox(uint16_t,uint16_t,uint16_t,uint16_t, uint16_t);
     String strTime(time_t);
+    void strToForecast(String&, forecast_t&);
 private:
     GxEPD &_display;
     Weather &_weather;

@@ -14,6 +14,7 @@ public:
     struct tm & getTimeRef();
     String getTimeString();
     long getGmtOffset() const;
+    time_t getUnixtime();
 private:
     struct tm timeInfo;
     long gmtOffset_sec = 7200;

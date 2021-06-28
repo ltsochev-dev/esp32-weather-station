@@ -6,6 +6,9 @@
         "ostream": "cpp",
         "sstream": "cpp",
         "streambuf": "cpp",
-        "ctime": "cpp"
+        "ctime": "cpp",
+        "cstdint": "cpp",
+        "random": "cpp",
+        "*.tcc": "cpp"
     }
 }
