@@ -11,14 +11,21 @@ void Clock::begin()
     getTime();
 }
 
-struct tm * Clock::getTime()
+const struct tm & Clock::getTime()
 {
     getLocalTime(&timeInfo);
 
-    return &timeInfo;
+    return timeInfo;
 }
 
-const char * Clock::getTimeString()
+struct tm & Clock::getTimeRef()
+{
+    getLocalTime(&timeInfo);
+
+    return timeInfo;
+}
+
+String Clock::getTimeString()
 {
     getTime();
 
@@ -26,7 +33,10 @@ const char * Clock::getTimeString()
 
     strftime(buff, sizeof(buff), "%H:%M", &timeInfo);
 
-    String str(buff);
+    return String(buff);
+}
 
-    return str.c_str();
+long Clock::getGmtOffset() const 
+{
+    return gmtOffset_sec;
 }

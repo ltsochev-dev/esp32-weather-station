@@ -4,6 +4,6 @@
 struct box {
     unsigned short x, y, w, h;
     unsigned short background = 0xFFFF;
-} BOX_STRUCT;
+};
 
 #endif

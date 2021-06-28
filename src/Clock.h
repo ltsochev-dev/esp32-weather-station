@@ -10,13 +10,15 @@ class Clock
 public:
     Clock(long gmtOffset, long daylightOffset, String ntpServ);
     void begin();
-    struct tm * getTime();
-    const char * getTimeString();
+    const struct tm & getTime();
+    struct tm & getTimeRef();
+    String getTimeString();
+    long getGmtOffset() const;
 private:
     struct tm timeInfo;
-    String ntpServer = "pool.ntp.org";
     long gmtOffset_sec = 7200;
     int daylightOffset_sec = 3600;
+    String ntpServer = "pool.ntp.org";
 };
 
 #endif
