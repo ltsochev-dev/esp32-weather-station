@@ -13,7 +13,6 @@ struct Forecast {
 typedef struct Forecast forecast_t;
 
 struct DisplayData {
-    // configTime(gmtOffset_sec, daylightOffset_sec, ntpServer.c_str());
     float roomTemp;
     time_t unixTime;
     forecast_t forecasts[5];

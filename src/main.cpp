@@ -3,7 +3,8 @@
 #define uS_TO_S_FACTOR 1000000   // Conversion factor for micro seconds to seconds 
 #define TIME_TO_SLEEP 60         // Time ESP32 will go to sleep (in seconds) 
 #define UPDATE_WEATHER_PROID  60 // One hour update cycle
-#define TEMPADCPIN 34
+#define TEMPADCPIN 36
+#define CONFIG_LITTLEFS_CACHE_SIZE 512
 
 #include <Arduino.h>
 #include <boards.h>
@@ -13,15 +14,13 @@
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
 #include <WiFi.h>
+#include <SPIFFS.h>
 #include "IMG_0001.h"
 #include "thermometer.h"
 #include "weather.h"
 #include "Clock.h"
 #include "DisplayService.h"
 #include "DisplayData.h"
-
-const char * ssid = "Krisi";
-const char * ssidPass = "krisi9404194775";
 
 void(* resetFunc) (void) = 0;  //declare reset funciton @ address 0
 GxIO_Class io(SPI, EPD_CS, EPD_DC, EPD_RSET);
@@ -37,6 +36,7 @@ DisplayService displayManager(display, ow, timeClock, tm);
 void showBoot();
 void wifiStart();
 void dumpDisplayData();
+void printFsData();
 
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
@@ -44,6 +44,11 @@ void setup() {
     Serial.println("setup");
 
     delay(1000);
+
+    if (!SPIFFS.begin(true)) {
+        Serial.println("An Error has occured while mounting the LlittleFS");
+        return;
+    }
 
     dumpDisplayData();
 
@@ -67,6 +72,7 @@ void setup() {
     } else {
         // First boot
         showBoot();
+        printFsData();
         wifiStart();
 
         timeClock.begin();
@@ -100,10 +106,31 @@ void showBoot() {
 }
 
 void wifiStart() {
-    WiFi.begin(ssid, ssidPass);
+
+    File file = SPIFFS.open("/wifi_config.txt", "r");
+    if (!file) {
+        Serial.println("Failed to open WiFi config file.");
+        return;
+    }
+
+    String settings = file.readString();
+    file.close();
+
+    int sIndex = settings.indexOf(',');
+
+    String ssid = settings.substring(0, sIndex);
+    String ssidPass = settings.substring(sIndex + 1);
+
+    ssid.trim();
+    ssidPass.trim();
+
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(ssid.c_str(), ssidPass.c_str());
 
     Serial.print("Connecting to: ");
-    Serial.println(ssid);
+    Serial.print(ssid);
+    Serial.print(" with password: ");
+    Serial.println(ssidPass);
 
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -140,5 +167,23 @@ void dumpDisplayData() {
     }
 
     Serial.println("Data dumped successfully...");
+
     delay(500);
+}
+
+void printFsData() {
+    unsigned int totalBytes = SPIFFS.totalBytes();
+    unsigned int usedBytes = SPIFFS.usedBytes();
+
+    Serial.println("===== File system info =====");
+ 
+    Serial.print("Total space:      ");
+    Serial.print(totalBytes);
+    Serial.println("byte");
+ 
+    Serial.print("Total space used: ");
+    Serial.print(usedBytes);
+    Serial.println("byte");
+ 
+    Serial.println();
 }

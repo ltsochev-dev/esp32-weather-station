@@ -45,10 +45,6 @@ void DisplayService::update()
 
 void DisplayService::loadSources()
 {
-    Serial.print("Obtaining proper time...");
-    _clock.begin();
-    Serial.println("Done.");
-    
     Serial.print("Obtaining weather data...");
     _weather.load();
     Serial.println("Done.");
@@ -105,10 +101,11 @@ void DisplayService::drawClock()
 
     box box = createBox(
         _display.width() - 90,
-        30, 90, 30, GxEPD_BLACK
+        30, 90, 30, GxEPD_WHITE
     );
 
-    _display.fillRect(box.x, 0, box.w, box.h, GxEPD_WHITE);
+    _display.fillRect(box.x, 0, box.w, box.h, box.background);
+    
     u8g2Fonts.setFont(u8g2_font_helvB24_tr);
     u8g2Fonts.setCursor(box.x, box.y);
     u8g2Fonts.print(_clock.getTimeString());
@@ -177,6 +174,7 @@ void DisplayService::serialize(displaydata_t & store)
     OW_current * current = _weather.getCurrentForecast();
     
     time(&store.unixTime);
+
     store.roomTemp = _thermometer.getLastReading();
 
     strToForecast(current->main, currentForecast);
@@ -203,14 +201,6 @@ void DisplayService::serialize(displaydata_t & store)
 void DisplayService::unserialize(displaydata_t & store)
 {
     Serial.print("Attempting to deserialize...");
-
-    struct timeval tv;
-    tv.tv_sec = store.unixTime;
-    tv.tv_usec = 0;
-
-    settimeofday(&tv, NULL);
-
-    // settimeofday(&store.unixTime, NULL);
 
     OW_current * current = _weather.getCurrentForecast();
     OW_hourly * hourly = _weather.getHourlyForecast();
