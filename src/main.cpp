@@ -14,7 +14,7 @@
 #include <GxIO/GxIO_SPI/GxIO_SPI.h>
 #include <GxIO/GxIO.h>
 #include <WiFi.h>
-#include <SPIFFS.h>
+#include "Config/Config.h"
 #include "IMG_0001.h"
 #include "thermometer.h"
 #include "weather.h"
@@ -28,12 +28,14 @@ GxEPD_Class display(io, EPD_RSET, EPD_BUSY);
 RTC_DATA_ATTR int bootCount = 0;
 RTC_DATA_ATTR displaydata_t displayDataStore;
 
+Config config("/settings.json", SPIFFS);
 Clock timeClock(7200, 3600, "pool.ntp.org");
 Weather ow("42.1627557", "24.7487006", "Plovdiv Bulgaria", "36d9d56c52e94add5faac575aef78dcf");
 Thermometer tm(display, TEMPADCPIN);
 DisplayService displayManager(display, ow, timeClock, tm);
 
 void showBoot();
+void loadConfig();
 void wifiStart();
 void dumpDisplayData();
 void printFsData();
@@ -46,9 +48,13 @@ void setup() {
     delay(1000);
 
     if (!SPIFFS.begin(true)) {
-        Serial.println("An Error has occured while mounting the LlittleFS");
+        Serial.println("An Error has occured while mounting the SPIFFS");
         return;
     }
+
+    Serial.println("Attempting to load config");
+
+    loadConfig();
 
     dumpDisplayData();
 
@@ -106,20 +112,8 @@ void showBoot() {
 }
 
 void wifiStart() {
-
-    File file = SPIFFS.open("/wifi_config.txt", "r");
-    if (!file) {
-        Serial.println("Failed to open WiFi config file.");
-        return;
-    }
-
-    String settings = file.readString();
-    file.close();
-
-    int sIndex = settings.indexOf(',');
-
-    String ssid = settings.substring(0, sIndex);
-    String ssidPass = settings.substring(sIndex + 1);
+    String ssid = config.getWifiSSID();
+    String ssidPass = config.getWifiPassword();
 
     ssid.trim();
     ssidPass.trim();
@@ -186,4 +180,18 @@ void printFsData() {
     Serial.println("byte");
  
     Serial.println();
+}
+
+void loadConfig()
+{
+    Serial.println("Attempting to parse config...");
+
+    if (!config.begin()) {
+        Serial.println("Error parsing config json.");
+        return;
+    }
+
+    Serial.println("Done.");
+
+    delay(500);
 }

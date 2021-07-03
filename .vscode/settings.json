@@ -9,6 +9,8 @@
         "ctime": "cpp",
         "cstdint": "cpp",
         "random": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "vector": "cpp",
+        "new": "cpp"
     }
 }
