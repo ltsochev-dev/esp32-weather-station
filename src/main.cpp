@@ -72,6 +72,7 @@ void setup() {
             displayManager.fullUpdate();
         } else {
             displayManager.unserialize(displayDataStore);
+            timeClock.refresh();
             displayManager.update();
         }
 

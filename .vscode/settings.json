@@ -11,6 +11,8 @@
         "random": "cpp",
         "*.tcc": "cpp",
         "vector": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "esp32-hal.h": "c",
+        "esp32-hal-timer.h": "c"
     }
 }
