@@ -200,3 +200,8 @@ String Config::getWifiPassword() const
 {
     return store->wifi.ssIdPass;
 }
+
+location_conf_t Config::getWeatherInfo() const
+{
+    return store->location;
+}

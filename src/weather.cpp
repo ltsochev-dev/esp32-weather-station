@@ -8,6 +8,13 @@ Weather::Weather(String lat, String lng, String loc, String apiKey)
     daily = new OW_daily;
 }
 
+Weather::Weather()
+{
+    current = new OW_current;
+    hourly = new OW_hourly;
+    daily = new OW_daily;
+}
+
 Weather::~Weather()
 {
     delete current;
@@ -18,6 +25,13 @@ Weather::~Weather()
 void Weather::setApiKey(String key)
 {
     openWeatherKey = key;
+}
+
+void Weather::setLocation(String lat, String lng, String loc)
+{
+    latitude = lat;
+    longitude = lng;
+    location = loc;
 }
 
 void Weather::load()

@@ -15,6 +15,7 @@ public:
     const conf_store_t * getData() const;
     String getWifiSSID() const;
     String getWifiPassword() const;
+    location_conf_t getWeatherInfo() const;
 private:
     void startDocument(); // JSON document has started, typically starts once
                           // Initialises variables used, e.g. sets objectLayer = 0

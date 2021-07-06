@@ -30,7 +30,7 @@ RTC_DATA_ATTR displaydata_t displayDataStore;
 
 Config config("/settings.json", SPIFFS);
 Clock timeClock(7200, 3600, "pool.ntp.org");
-Weather ow("42.1627557", "24.7487006", "Plovdiv Bulgaria", "36d9d56c52e94add5faac575aef78dcf");
+Weather ow;
 Thermometer tm(display, TEMPADCPIN);
 DisplayService displayManager(display, ow, timeClock, tm);
 
@@ -55,6 +55,10 @@ void setup() {
     Serial.println("Attempting to load config");
 
     loadConfig();
+
+    location_conf_t weatherConf = config.getWeatherInfo();
+    ow.setApiKey(weatherConf.owApiKey);
+    ow.setLocation(String(weatherConf.latitude), String(weatherConf.longitude), weatherConf.location);
 
     dumpDisplayData();
 

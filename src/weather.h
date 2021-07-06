@@ -8,11 +8,13 @@
 class Weather
 {
 public:
+    Weather();
     Weather(String lat, String lng, String loc, String apiKey);
     ~Weather();
     void setApiKey(String key);
     void setUnits(String unit);
     void setLanguage(String lng);
+    void setLocation(String lat, String lng, String loc);
     String getUnits();
     String getLocation();
     void load();
