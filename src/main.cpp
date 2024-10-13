@@ -56,9 +56,14 @@ void setup() {
 
     loadConfig();
 
-    location_conf_t weatherConf = config.getWeatherInfo();
-    ow.setApiKey(weatherConf.owApiKey);
-    ow.setLocation(String(weatherConf.latitude), String(weatherConf.longitude), weatherConf.location);
+    location_conf_t locationConf = config.getLocationConfig();
+    ow.setLocation(String(locationConf.latitude), String(locationConf.longitude), locationConf.location);
+    openweather_conf_t openWeatherConf = config.getOpenWeatherConfig();
+    ow.setApiKey(openWeatherConf.owApiKey);
+    ow.setBaseURL(openWeatherConf.baseURL);
+    ow.setIsFreeVersion(openWeatherConf.isfreeVersion);
+    ow.setIsFullDataSet(openWeatherConf.isfullDataSet);
+    ow.setIsSecureConnection(openWeatherConf.isSecureConnection);
 
     dumpDisplayData();
 

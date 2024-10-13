@@ -12,6 +12,11 @@ public:
     Weather(String lat, String lng, String loc, String apiKey);
     ~Weather();
     void setApiKey(String key);
+    void setIsSecureConnection(bool isSecure);
+    void setBaseURL(String key);
+    void setIsFreeVersion(bool isOWFreeVersion);
+    bool getIsFreeVersion();
+    void setIsFullDataSet(bool isFullDataSet);
     void setUnits(String unit);
     void setLanguage(String lng);
     void setLocation(String lat, String lng, String loc);
@@ -26,6 +31,10 @@ protected:
     String longitude;
     String location;
     String openWeatherKey;
+    String baseURL;
+    bool freeVersion;
+    bool secure;
+    bool fullSet;
     String units = "metric";  // or "imperial"
     String language = "en";   // See notes tab
 private:

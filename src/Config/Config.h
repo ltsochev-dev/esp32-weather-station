@@ -15,7 +15,8 @@ public:
     const conf_store_t * getData() const;
     String getWifiSSID() const;
     String getWifiPassword() const;
-    location_conf_t getWeatherInfo() const;
+    location_conf_t getLocationConfig() const;
+    openweather_conf_t getOpenWeatherConfig() const;
 private:
     void startDocument(); // JSON document has started, typically starts once
                           // Initialises variables used, e.g. sets objectLayer = 0
@@ -37,9 +38,6 @@ private:
     void whitespace(char c);              // Whitespace character in JSON - not used
 
     void error( const char *message );    // Error message is sent to serial port
-
-    void fullDataSet(const char *value);    // Populate structure with full data set
-    void partialDataSet(const char *value); // Populate structure with minimal data set
 private:
     String path;
     conf_store_t * store;
@@ -49,7 +47,6 @@ private:
                             // taken to the name:value pair in the form "hourly/data"
                             // so values can be pulled from the correct array.
                             // Needed since different objects contain "data" arrays.
-    bool     partialSet = false;    // Set true for partial data set acquisition
 
     String   currentParent; // Current object e.g. "daily"
     uint16_t objectLevel;   // Object level, increments for new object, decrements at end

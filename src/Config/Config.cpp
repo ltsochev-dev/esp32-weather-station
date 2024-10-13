@@ -103,12 +103,6 @@ void Config::key(const char *key)
     currentKey = key;
 }
 
-void Config::value(const char *value)
-{
-    if (!partialSet) fullDataSet(value);
-    else partialDataSet(value);
-}
-
 void Config::whitespace(char c)
 {
     c = c; // Avoid warning
@@ -121,7 +115,7 @@ void Config::error( const char *message )
     parseOK = false;
 }
 
-void Config::fullDataSet(const char *value)
+void Config::value(const char *value)
 {
     String val = value;
 
@@ -136,57 +130,32 @@ void Config::fullDataSet(const char *value)
 
     if (currentParent == "location") {
         data_set = "location";
-        if (currentKey == "latitide") store->location.latitude = val.toFloat();
+        if (currentKey == "latitude") store->location.latitude = val.toFloat();
         if (currentKey == "longitude") store->location.longitude = val.toFloat();
         if (currentKey == "location") store->location.location = val;
-        if (currentKey == "ow_key") store->location.owApiKey = val;
 
         return;
     }
 
     if (currentParent == "wifi") {
         data_set = "wifi";
-        if (currentKey == "id") store->wifi.ssId = val;
+        if (currentKey == "ssid") store->wifi.ssId = val;
         if (currentKey == "pass") store->wifi.ssIdPass = val;
 
         return;
     }
-}
 
-void Config::partialDataSet(const char *value)
-{
-    String val = value;
-
-    if (currentParent == "clock") {
-        data_set = "clock";
-        if (currentKey == "gmt_offset") store->clock.gmtOffset = (int)val.toInt();
+    if (currentParent == "openweather") {
+        data_set = "openweather";
+        if (currentKey == "api_key") store->openweather.owApiKey = val;
         else
-        if (currentKey == "daylight_offset") store->clock.daylightOffset = (int)val.toInt();
+        if (currentKey == "base_url") store->openweather.baseURL = val;
         else
-        if (currentKey == "ntp_servers") store->clock.ntpServers.push_back(val);
-
-        return;
-    }
-
-    if (currentParent == "location") {
-        data_set = "location";
-        if (currentKey == "latitide") store->location.latitude = val.toFloat();
+        if (currentKey == "free_version") store->openweather.isfreeVersion = val.equals("true");
         else
-        if (currentKey == "longitude") store->location.longitude = val.toFloat();
+        if (currentKey == "full_data_set") store->openweather.isfullDataSet = val.equals("true");
         else
-        if (currentKey == "location") store->location.location = val;
-        else
-        if (currentKey == "ow_key") store->location.owApiKey = val;
-
-        return;
-    }
-
-    if (currentParent == "wifi") {
-        data_set = "wifi";
-        if (currentKey == "id") store->wifi.ssId = val;
-        else
-        if (currentKey == "pass") store->wifi.ssIdPass = val;
-
+        if (currentKey == "secure_connection") store->openweather.isSecureConnection = val.equals("true");
         return;
     }
 }
@@ -201,7 +170,12 @@ String Config::getWifiPassword() const
     return store->wifi.ssIdPass;
 }
 
-location_conf_t Config::getWeatherInfo() const
+location_conf_t Config::getLocationConfig() const
 {
     return store->location;
+}
+
+openweather_conf_t Config::getOpenWeatherConfig() const
+{
+    return store->openweather;
 }

@@ -13,6 +13,17 @@
         "vector": "cpp",
         "new": "cpp",
         "esp32-hal.h": "c",
-        "esp32-hal-timer.h": "c"
+        "esp32-hal-timer.h": "c",
+        "cstddef": "cpp",
+        "limits": "cpp",
+        "print": "cpp",
+        "ratio": "cpp",
+        "array": "cpp",
+        "functional": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "variant": "cpp",
+        "charconv": "cpp"
     }
 }

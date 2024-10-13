@@ -27,6 +27,21 @@ void Weather::setApiKey(String key)
     openWeatherKey = key;
 }
 
+void Weather::setBaseURL(String key)
+{
+    baseURL = key;
+}
+
+void Weather::setIsFreeVersion(bool isOWFreeVersion)
+{
+    freeVersion = isOWFreeVersion;
+}
+
+bool Weather::getIsFreeVersion()
+{
+    return freeVersion;
+}
+
 void Weather::setLocation(String lat, String lng, String loc)
 {
     latitude = lat;
@@ -34,9 +49,19 @@ void Weather::setLocation(String lat, String lng, String loc)
     location = loc;
 }
 
+void Weather::setIsSecureConnection(bool isSecure)
+{
+    secure = isSecure;
+}
+
+void Weather::setIsFullDataSet(bool isFullDataSet)
+{
+    fullSet = isFullDataSet;
+}
+
 void Weather::load()
 {
-    if (!ow.getForecast(current, hourly, daily, openWeatherKey, latitude, longitude, units, language)) {
+    if (!ow.getForecast(current, hourly, daily, openWeatherKey, baseURL, latitude, longitude, units, language, secure, freeVersion, fullSet)) {
         current->main = "Error";
     }
 }
