@@ -29,17 +29,15 @@ class OW_Weather: public JsonListener {
     // Sketch calls this forecast request, it returns true if no parse errors encountered
     // ESP8266 only: setting secure to false will invoke an insecure connection
     bool getForecast(OW_current *current, OW_hourly *hourly, OW_daily  *daily,
-                     String api_key, String latitude, String longitude,
-                     String units, String language, bool secure = true);
+                     String api_key, String base_url, String latitude, String longitude,
+                     String units, String language, bool secure, bool freeVersion, bool fullSet);
 
     // Called by library (or user sketch), sends a GET request to a https (secure) url
     bool parseRequest(String url); // and parses response, returns true if no parse errors
 
     // Called by library (or user sketch), sends a GET request to a http (insecure) url
     bool parseRequestSecure(String* url); 
-    bool parseRequestInsecure(String* url); 
-
-    void partialDataSet(bool partialSet);
+    bool parseRequestInsecure(String* url);
 
     float    lat = 0;
     float    lon = 0;
@@ -70,6 +68,7 @@ class OW_Weather: public JsonListener {
     void error( const char *message );    // Error message is sent to serial port
 
     void fullDataSet(const char *value);    // Populate structure with full data set
+    void freeDataSet(const char *value);    // Populate structure with data of free plan
     void partialDataSet(const char *value); // Populate structure with minimal data set
 
 
@@ -96,7 +95,8 @@ class OW_Weather: public JsonListener {
     bool     parseOK;       // true if the parse been completed
                             // (does not mean data values gathered are good!)
 
-    bool     partialSet = false;    // Set true for partial data set acquisition
+    bool     fullSet = false;       // Set true for partial data set acquisition
+    bool     freeSet = true;       // Set true if you use the free version of OpenWeather
 
     String   currentParent; // Current object e.g. "daily"
     uint16_t objectLevel;   // Object level, increments for new object, decrements at end

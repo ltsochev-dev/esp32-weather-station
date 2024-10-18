@@ -26,6 +26,7 @@ private:
     void drawCurrentWeather();
     void drawRoomTemperature();
     void drawForecast();
+    void drawAdditionalInformation();
     struct box createBox(uint16_t,uint16_t,uint16_t,uint16_t, uint16_t);
     String strTime(time_t);
     void strToForecast(String&, forecast_t&);

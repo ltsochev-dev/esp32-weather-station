@@ -4,6 +4,8 @@
 // Created by Bodmer 09/04/2020
 // Updated by Bodmer 08/01/2021
 
+//#define SHOW_JSON
+
 // See license.txt in root folder of library
 // Insecure mode added by ADAMSIN12
 
@@ -35,8 +37,8 @@
 //          for the connection, when set true BearSSL will be used.
 // ESP32:   Secure parameter has no affect.
 bool OW_Weather::getForecast(OW_current *current, OW_hourly *hourly, OW_daily *daily,
-                             String api_key, String latitude, String longitude,
-                             String units, String language, bool secure) {
+                             String api_key, String base_url, String latitude, String longitude,
+                             String units, String language, bool secure, bool isFreeVersion, bool isFullSet) {
 
   data_set = "";
   hourly_index = 0;
@@ -54,7 +56,13 @@ bool OW_Weather::getForecast(OW_current *current, OW_hourly *hourly, OW_daily *d
   if (!hourly)   exclude += ",hourly";
   if (!daily)    exclude += ",daily";
 
-  String url = "https://api.openweathermap.org/data/2.5/onecall?lat=" + latitude + "&lon=" + longitude + "&exclude=minutely" + exclude + "&units=" + units + "&lang=" + language + "&appid=" + api_key;
+  // wether to use the free version of OW or not
+  freeSet = isFreeVersion;
+  fullSet = isFullSet;
+  // set the url from configuration
+  String url = base_url + "?lat=" + latitude + "&lon=" + longitude + "&exclude=minutely" + exclude + "&units=" + units + "&lang=" + language + "&appid=" + api_key;
+
+  //Serial.println(url);
 
   // Send GET request and feed the parser
   bool result = parseRequest(url);
@@ -65,15 +73,6 @@ bool OW_Weather::getForecast(OW_current *current, OW_hourly *hourly, OW_daily *d
   this->daily    = nullptr;
 
   return result;
-}
-
-/***************************************************************************************
-** Function name:           partialDataSet
-** Description:             Set requested data set to partial (true) or full (false)
-***************************************************************************************/
-void OW_Weather::partialDataSet(bool partialSet) {
-  
-  this->partialSet = partialSet;
 }
 
 #ifdef ESP32 // Decide if ESP32 or ESP8266 parseRequest available
@@ -137,7 +136,7 @@ bool OW_Weather::parseRequest(String url) {
   OW_STATUS_PRINTF("\nParsing JSON\n");
 
   // Parse the JSON data, available() includes yields
-  while ( client.available() > 0 || client.connected())
+  while (client.available() > 0 || client.connected())
   {
     while(client.available() > 0)
     {
@@ -349,7 +348,7 @@ bool OW_Weather::parseRequestInsecure(String* url) {
   return parseOK;
 }
 
- #endif // ESP32 or ESP8266 parseRequest
+#endif // ESP32 or ESP8266 parseRequest
 
 
 /***************************************************************************************
@@ -451,8 +450,9 @@ void OW_Weather::error( const char *message ) {
 ***************************************************************************************/
 void OW_Weather::value(const char *val)
 {
-  if (!partialSet) fullDataSet(val);
-  else partialDataSet(val);
+    if (freeSet) freeDataSet(val);
+    else if (fullSet) fullDataSet(val);
+    else partialDataSet(val);
 }
 
 /***************************************************************************************
@@ -629,7 +629,100 @@ void OW_Weather::fullDataSet(const char *val) {
 
     return;
   }
+}
 
+
+/***************************************************************************************
+** Function name:           freeDataSet
+** Description:             Collects full data set
+***************************************************************************************/
+void OW_Weather::freeDataSet(const char *val) {
+  String value = val;
+
+  // Start of JSON
+  if (currentParent == "") {
+    data_set = "";
+    if (currentKey == "visibility") current->visibility = value.toInt();
+    else
+    if (currentKey == "dt") current->dt = (uint32_t)value.toInt();
+    else
+    if (currentKey == "timezone") timezone = value;
+    else
+    if (currentKey == "id") current->id = value.toInt();
+
+    return;
+  }
+
+  if (currentParent == "coord") {
+    if (currentKey == "lat") lat = value.toFloat();
+    else
+    if (currentKey == "lon") lon = value.toFloat();
+
+    return;
+  }
+
+  if (currentParent == "main") {
+    data_set = "main";
+    if (currentKey == "temp") current->temp = value.toFloat();
+    else
+    if (currentKey == "humidity") current->humidity = value.toInt();
+    else
+    if (currentKey == "feels_like") current->feels_like = value.toFloat();
+    else
+    if (currentKey == "pressure") current->pressure = value.toFloat();
+
+    return;
+  }
+
+  if (currentParent == "sys") {
+    data_set = "sys";
+    if (currentKey == "sunrise") current->sunrise = (uint32_t)value.toInt();
+    else
+    if (currentKey == "sunset") current->sunset = (uint32_t)value.toInt();
+
+    return;
+  }
+
+  if (currentParent == "clouds") {
+    if (currentKey == "all") current->clouds = value.toInt();
+
+    return;
+  }
+
+  if (currentParent == "wind") {
+    data_set = "wind";
+    if (currentKey == "speed") current->wind_speed = value.toFloat();
+    else
+    if (currentKey == "deg") current->wind_deg = value.toInt();
+    else
+    if (currentKey == "gust") current->wind_gust = value.toFloat();
+
+    return;
+  }
+
+  if (currentParent == "rain") {
+    if (currentKey == "1h") current->rain = value.toFloat();
+
+    return;
+  }
+
+  if (currentParent == "snow") {
+    if (currentKey == "1h") current->snow = value.toFloat();
+
+    return;
+  }
+
+  if (currentParent == "weather") {
+    if (currentKey == "id") current->id = value.toInt();
+    else
+    if (currentKey == "main") current->main = value;
+    else
+    if (currentKey == "description") current->description = value;
+    else
+    if (currentKey == "icon") current->icon = value;
+
+    return;
+  }
 }
 
 /***************************************************************************************

@@ -26,7 +26,9 @@ void DisplayService::fullUpdate()
     drawClock();
     drawCurrentWeather();
     drawRoomTemperature();
-    drawForecast();
+
+    if (!_weather.getIsFreeVersion()) drawForecast();
+    else drawAdditionalInformation();
 
     _display.update();
 }
@@ -38,7 +40,9 @@ void DisplayService::update()
     drawClock();
     drawCurrentWeather();
     drawRoomTemperature();
-    drawForecast();
+
+    if (!_weather.getIsFreeVersion()) drawForecast();
+    else drawAdditionalInformation();
 
     _display.update();
 }
@@ -91,7 +95,7 @@ void DisplayService::drawRoomTemperature()
     uint16_t y_main = 65;
     u8g2Fonts.setFont(u8g2_font_helvB12_tf);
     u8g2Fonts.setCursor(0, y_main);
-    u8g2Fonts.print("Room:");
+    u8g2Fonts.print("Room: ");
     u8g2Fonts.print(String(temp) + "°C");
 }
 
@@ -109,6 +113,58 @@ void DisplayService::drawClock()
     u8g2Fonts.setFont(u8g2_font_helvB24_tr);
     u8g2Fonts.setCursor(box.x, box.y);
     u8g2Fonts.print(_clock.getTimeString());
+}
+
+void DisplayService::drawAdditionalInformation()
+{
+    OW_current * current = _weather.getCurrentForecast();
+
+    _display.setRotation(3);
+
+    uint16_t box_x = 0;
+    uint16_t box_w = floor(_display.width());
+    uint16_t box_h = 45;
+    uint16_t box_y =  _display.height() - box_h;
+
+    _display.fillRect(box_x, box_y, box_w, box_h, GxEPD_WHITE);
+
+    // Draw forecast
+    uint16_t y_main = 94;
+    u8g2Fonts.setFont(u8g2_font_helvB12_tf);
+    u8g2Fonts.setCursor(1, y_main);
+    u8g2Fonts.print("Pressure: ");
+    u8g2Fonts.print(current->pressure);
+    u8g2Fonts.print(" hPa");
+    u8g2Fonts.setCursor(1, y_main + 21);
+    u8g2Fonts.print("Wind: ");
+    u8g2Fonts.print(current->wind_speed);
+    u8g2Fonts.print(" bft, ");
+    u8g2Fonts.print(current->wind_gust);
+    u8g2Fonts.print(" bft, ");
+    u8g2Fonts.print(current->wind_deg);
+    u8g2Fonts.print("°");
+
+    uint16_t ax, ay, bx, by, cx, cy, dx, dy;
+    ax = box_x;
+    ay = box_y;
+    bx = box_x + box_w - 1;
+    by = box_y;
+    dx = box_x;
+    dy = _display.height() - 1;
+    cx = box_x + box_w - 1;
+    cy = _display.height() - 1;
+
+    // Top border
+    _display.drawLine(ax, ay, bx, by, GxEPD_BLACK);
+
+    // Right border
+    _display.drawLine(bx, by, cx, cy, GxEPD_BLACK);
+
+    // Bottom border
+    _display.drawLine(dx, dy, cx, cy, GxEPD_BLACK);
+
+    // Left border
+    _display.drawLine(ax, ay, dx, dy, GxEPD_BLACK);
 }
 
 void DisplayService::drawForecast()
@@ -180,6 +236,10 @@ void DisplayService::serialize(displaydata_t & store)
     strToForecast(current->main, currentForecast);
     currentForecast.temp = current->temp;
     currentForecast.humidity = current->humidity;
+    currentForecast.pressure = current->pressure;
+    currentForecast.wind_speed = current->wind_speed;
+    currentForecast.wind_deg = current->wind_deg;
+    currentForecast.wind_gust = current->wind_gust;
 
     store.forecasts[0] = currentForecast;
 
@@ -209,6 +269,10 @@ void DisplayService::unserialize(displaydata_t & store)
     current->main = String(store.forecasts[0].weather);
     current->temp = store.forecasts[0].temp;
     current->humidity = store.forecasts[0].humidity;
+    current->pressure = store.forecasts[0].pressure;
+    current->wind_speed = store.forecasts[0].wind_speed;
+    current->wind_deg = store.forecasts[0].wind_deg;
+    current->wind_gust = store.forecasts[0].wind_gust;
 
     for (int i = 1; i <= 4; i++) {
         // hourly->main[(i - 1)] = store.forecasts[i].main;

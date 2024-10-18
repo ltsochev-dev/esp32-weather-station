@@ -91,7 +91,7 @@ void printCurrentWeather()
   //For problems with ESP8266 stability, use AXTLS by adding a false parameter thus       vvvvv
   //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
 
-  ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
+  ow.getForecast(current, hourly, daily, api_key, base_url, latitude, longitude, units, language);
 
   Serial.println("Weather from Open Weather\n");
 

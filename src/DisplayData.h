@@ -8,6 +8,10 @@ struct Forecast {
     char weather[50];
     float temp;
     unsigned char humidity;
+    float pressure;
+    float wind_speed;
+    int wind_deg;
+    float wind_gust;
 };
 
 typedef struct Forecast forecast_t;

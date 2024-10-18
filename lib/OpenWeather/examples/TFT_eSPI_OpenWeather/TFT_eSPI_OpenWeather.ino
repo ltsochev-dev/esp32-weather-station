@@ -227,7 +227,7 @@ void updateData() {
   //For problems with ESP8266 stability, use AXTLS by adding a false parameter thus       vvvvv
   //ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language, false);
 
-  bool parsed = ow.getForecast(current, hourly, daily, api_key, latitude, longitude, units, language);
+  bool parsed = ow.getForecast(current, hourly, daily, api_key, base_url, latitude, longitude, units, language);
 
   if (parsed) Serial.println("Data points received");
   else Serial.println("Failed to get data points");
